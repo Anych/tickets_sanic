@@ -8,7 +8,7 @@ x-environment-vars: &environment-vars
 services:
   tickets:
     build:
-      context: ../..
+      context: .
       dockerfile: Dockerfile
     environment:
       <<: *environment-vars
@@ -16,6 +16,6 @@ services:
       - "8000:8000"
     volumes:
       - .:/proj
-    command: python -m anuarbek.server
+    command: python -m tickets.server
     stdin_open: true
     tty: true

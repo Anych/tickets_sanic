@@ -1,7 +1,7 @@
 from sanic import Sanic
 from sanic.response import text, json
 
-from anuarbek.tickets.directories.responds import booking, offer
+from tickets.directories.responds import booking, offer
 
 app = Sanic('tickets')
 
