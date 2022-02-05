@@ -4,58 +4,18 @@ x-environment-vars: &environment-vars
     PYTHONUNBUFFERED: 1
     PYTHONIOENCODING: utf-8
     TERM: linux
-    DATABASE_URL: postgres://postgres:123@postgres:5432/postgres?sslmode=disable
-    DEBUG: 'true'
-    REDIS_URL: redis://default:123@redis:6379
 
 services:
-
-  app:
+  tickets:
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
+      dockerfile: Dockerfile
     environment:
       <<: *environment-vars
     ports:
       - "8000:8000"
     volumes:
       - .:/proj
-    command: python -m code.app
+    command: python -m anuarbek.server
     stdin_open: true
     tty: true
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  postgres:
-    image: postgres:14.1-alpine
-    environment:
-      POSTGRES_PASSWORD: "123"
-      restart: always
-      PGDATA: "/var/lib/postgresql/data/tickets"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 1s
-      timeout: 1s
-      retries: 5
-
-  redis:
-    image: redis:7.0-rc1-alpine
-
-  currencies-worker:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-    volumes:
-      - .:/proj
-      - /proj/bin
-    environment:
-      - DEBUG=True
-      - REDIS_URL=redis://redis:6379
-    command: python -m code.currencies
-    stdin_open: true
-    tty: true
-
-networks:
-  default:
-    name: app-platform
