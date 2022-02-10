@@ -7,7 +7,7 @@ COPY ../../../requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 RUN useradd -m -d /proj -s /bin/bash app
-COPY ../../.. /proj
+COPY . /proj
 WORKDIR /proj
 RUN chown -R app:app /proj/*
 USER app
