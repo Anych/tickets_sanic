@@ -9,13 +9,13 @@ services:
   tickets:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: tickets/docker/Dockerfile
     environment:
       <<: *environment-vars
     ports:
       - "8000:8000"
     volumes:
       - .:/proj
-    command: python -m tickets.server
+    command: python -m tickets.code.app
     stdin_open: true
     tty: true
