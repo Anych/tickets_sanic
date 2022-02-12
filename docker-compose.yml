@@ -4,9 +4,13 @@ x-environment-vars: &environment-vars
     PYTHONUNBUFFERED: 1
     PYTHONIOENCODING: utf-8
     TERM: linux
+    DATABASE_URL: postgres://postgres:123@postgres:5432/postgres
+    DEBUG: 'true'
+    REDIS_URL: redis://redis:123@redis:6379/redis
 
 services:
-  tickets:
+
+  app:
     build:
       context: .
       dockerfile: tickets/docker/Dockerfile
@@ -19,3 +23,17 @@ services:
     command: python -m tickets.code.app
     stdin_open: true
     tty: true
+
+  postgres:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_PASSWORD: "123"
+      PGDATA: "/var/lib/postgresql/data/tickets"
+
+  redis:
+    image: redis:7.0-rc1-alpine
+
+networks:
+  default:
+    external: true
+    name: tickets-platform
