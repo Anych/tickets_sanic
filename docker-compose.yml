@@ -6,7 +6,7 @@ x-environment-vars: &environment-vars
     TERM: linux
     DATABASE_URL: postgres://postgres:123@postgres:5432/postgres?sslmode=disable
     DEBUG: 'true'
-    REDIS_URL: redis://redis:123@redis:6379/redis
+    REDIS_URL: redis://default:123@redis:6379
 
 services:
 
@@ -38,8 +38,7 @@ services:
   redis:
     image: redis:7.0-rc1-alpine
 
-
 networks:
   default:
-    external: true
-    name: tickets-platform
+    external:
+      name: tickets-platform
