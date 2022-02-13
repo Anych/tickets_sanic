@@ -1,3 +1,5 @@
+import json
+
 import aioredis
 import asyncpg
 from sanic import Sanic
@@ -47,6 +49,14 @@ async def booking_details(request, booking_id):
 async def init_before(app, loop):
     app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
     app.ctx.redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
+
+
+@app.get('/get_all', strict_slashes=True)
+async def get_all(request):
+    async with request.app.ctx.db_pool.acquire() as conn:
+        data = await conn.fetch('SELECT * FROM booking')
+        data = [{'id': d['id'], 'name': d['name']} for d in data]
+        return response.json(data, dumps=json.dumps, default=str)
 
 
 if __name__ == '__main__':

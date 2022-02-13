@@ -4,6 +4,8 @@ COPY ../../requirements.txt /tmp/requirements.txt
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
+ENV TZ=Asia/Almaty
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 ADD https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64 /usr/local/bin/dbmate
 RUN chmod +x /usr/local/bin/dbmate

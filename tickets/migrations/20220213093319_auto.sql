@@ -1,5 +1,11 @@
 -- migrate:up
-CREATE TABLE public.booking
+CREATE TYPE gender AS ENUM ('M', 'F')
+CREATE TYPE cabin AS ENUM ('Economy', 'Business')
+CREATE TYPE offer_type AS ENUM ('OW', 'RT')
+CREATE TYPE passenger_type AS ENUM ('ADT', 'CHD', 'INF')
+CREATE TYPE passenger_type AS ENUM ('Amadeus', 'Sabre')
+
+CREATE TABLE booking
 (
     id serial NOT NULL,
     offer_id uuid NOT NULL,
@@ -11,8 +17,7 @@ WITH (
     OIDS = FALSE
 );
 
-ALTER TABLE public.booking
-    OWNER to postgres;
+ALTER TABLE booking OWNER to postgres;
 
 -- migrate:down
 
