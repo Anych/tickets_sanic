@@ -4,7 +4,7 @@ x-environment-vars: &environment-vars
     PYTHONUNBUFFERED: 1
     PYTHONIOENCODING: utf-8
     TERM: linux
-    DATABASE_URL: postgres://postgres:123@postgres:5432/postgres
+    DATABASE_URL: postgres://postgres:123@postgres:5432/postgres?sslmode=disable
     DEBUG: 'true'
     REDIS_URL: redis://redis:123@redis:6379/redis
 
@@ -20,9 +20,14 @@ services:
       - "8000:8000"
     volumes:
       - .:/proj
-    command: python -m tickets.code.app
+    command: >
+      sh -c "dbmate -d tickets/migrations --no-dump-schema migrate &&
+             python -m tickets.code.app"
     stdin_open: true
     tty: true
+    depends_on:
+      - postgres
+      - redis
 
   postgres:
     image: postgres:14.1-alpine
@@ -32,6 +37,7 @@ services:
 
   redis:
     image: redis:7.0-rc1-alpine
+
 
 networks:
   default:
