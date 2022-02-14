@@ -1,22 +1,16 @@
-import json
-
 import aioredis
 import asyncpg
 from sanic import Sanic
 from sanic import response
 
-from tickets.code import settings
-from tickets.code.utils import get_fake_data, rate_exchange
+from tickets.code import settings, web
+from tickets.code.utils import get_fake_data, rate_exchange, initialize_scheduler
 
+UUID_PATTERN = r'[0-9a-f]{8}-[0-9a-f]{4}-{4}[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
 app = Sanic('tickets')
 
 
-@app.route('/search', methods=['POST'])
-async def create_search(request):
-    static_data = {
-        "id": "d9e0cf5a-6bb8-4dae-8411-6caddcfd52da"
-    }
-    return response.json(static_data)
+app.add_route(web.search, '/search', methods=['POST'])
 
 
 @app.route('/search/<search_id>', methods=['GET'])
@@ -48,11 +42,8 @@ async def booking_details(request, booking_id):
 async def init_before(app, loop):
     app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
     app.ctx.redis = await aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
-
-
-@app.listener("before_server_start")
-async def get_rate(app, loop):
     await rate_exchange(app)
+    initialize_scheduler(app, loop)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from datetime import datetime
 
 import requests
 import xmltodict
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
 def get_fake_data(filename):
@@ -14,8 +15,19 @@ def get_fake_data(filename):
 async def rate_exchange(app):
     date = datetime.today().strftime('%d.%m.%Y')
     response = requests.get(f'https://www.nationalbank.kz/rss/get_rates.cfm?fdate={date}')
-
     rates = xmltodict.parse(response.text)
     for rate in rates['rates']['item']:
         currency = {'description': rate['description'], 'quant': rate['quant']}
         await app.ctx.redis.hset(rate['title'], mapping=currency)
+        async with app.ctx.db_pool.acquire() as conn:
+            await conn.execute('INSERT INTO currency(title, description, quantity) VALUES($1, $2, $3)',
+                               rate['title'], rate['description'], int(rate['quant']))
+
+
+def initialize_scheduler(app, loop):
+    scheduler = AsyncIOScheduler({
+        'event_loop': loop,
+        'apscheduler.timezone': 'Asia/Almaty',
+    })
+    scheduler.add_job(rate_exchange, 'cron', day='*', hour=12, minute=00, args=[app])
+    return scheduler.start()

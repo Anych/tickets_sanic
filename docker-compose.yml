@@ -31,8 +31,10 @@ services:
 
   postgres:
     image: postgres:14.1-alpine
+    restart: always
     environment:
       POSTGRES_PASSWORD: "123"
+      restart: always
       PGDATA: "/var/lib/postgresql/data/tickets"
 
   redis:
