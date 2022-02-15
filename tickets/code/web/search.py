@@ -1,5 +1,13 @@
-import asyncio
+import time
+
+from sanic.response import HTTPResponse
+
+from tickets.code.utils import search_in_providers
 
 
-async def search(request):
-    await asyncio.sleep(30)
+async def create_search(request):
+    app = request.app
+    asd = app.add_task(search_in_providers(request))
+    return HTTPResponse()
+
+
