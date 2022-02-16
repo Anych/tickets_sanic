@@ -1,6 +1,4 @@
-import asyncio
 import json
-import time
 from datetime import datetime
 
 import requests
@@ -22,28 +20,47 @@ async def rate_exchange(app):
         currency = {'description': rate['description'], 'quant': rate['quant']}
         await app.ctx.redis.hset(rate['title'], mapping=currency)
         async with app.ctx.db_pool.acquire() as conn:
-            await conn.execute('INSERT INTO currency(title, description, quantity) VALUES($1, $2, $3)',
+            await conn.execute('INSERT INTO currency_exchange(title, description, quantity) VALUES($1, $2, $3)',
                                rate['title'], rate['description'], int(rate['quant']))
 
 
-def initialize_scheduler(app, loop):
+async def initialize_scheduler(app, loop):
     scheduler = AsyncIOScheduler({
         'event_loop': loop,
         'apscheduler.timezone': 'Asia/Almaty',
     })
-    scheduler.add_job(rate_exchange, 'cron', day='*', hour=12, minute=00, args=[app])
+    scheduler.add_job(rate_exchange, 'cron', day='*', hour=16, minute=34, args=[app])
     return scheduler.start()
 
 
-async def search_in_providers(request):
-    search_data = request.json
+async def change_currency_to_kzt(app, data):
+    for num in range(len(data['items'])):
+        if data['items'][num]['price']['currency'] != 'KZT':
+
+            try:
+                value = await app.ctx.redis.hget(data['items'][num]['price']['currency'], 'description')
+                qty = await app.ctx.redis.hget(data['items'][num]['price']['currency'], 'quant')
+            except Exception as e:
+                print(e)
+
+                title = data['items'][num]['price']['currency']
+                async with app.ctx.db_pool.acquire() as conn:
+                    currency = await conn.fetch(f"SELECT * FROM currency_exchange WHERE title = '{title}'"
+                                                f" ORDER BY TIMESTAMP DESC LIMIT 1")
+                    currency = [{'description': d['description'], 'quantity': d['quantity']} for d in currency][0]
+                    value = currency['description']
+                    qty = currency['qty']
+
+            kzt_value = int(data['items'][num]['price']['amount'] * float(value) / int(qty))
+            data['items'][num]['price']['currency'] = 'KZT'
+            data['items'][0]['price']['amount'] = kzt_value
+
+
+async def search_in_providers(request, provider):
     app = request.app
-    for provider in ['Amadeus', 'Sabre']:
-        search_data['provider'] = provider
-        data = requests.post(r'https://avia-api.k8s-test.aviata.team/offers/search', json=search_data).json()
-        await app.ctx.redis.hset(provider, 'search_id', data['search_id'])
-        for item in data['items'][:2]:
-            await app.ctx.redis.hset(data['search_id'], 'item_id', item['id'])
-            for flight in item['flights']:
-                await app.ctx.redis.hset(item['id'], 'duration', flight['duration'])
-                print(flight)
+    request.json['provider'] = provider
+    data = requests.post(r'https://avia-api.k8s-test.aviata.team/offers/search', json=request.json).json()
+    search_id = data['search_id']
+    await change_currency_to_kzt(app, data)
+    await app.ctx.redis.set(request.json['provider'], str(data))
+    return search_id

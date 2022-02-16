@@ -114,7 +114,7 @@ ALTER TABLE public.passenger
 -- currency_exchange
 CREATE TABLE currency_exchange
 (
-    id bigserial NOT NULL UNIQUE,
+    id serial NOT NULL UNIQUE,
     title character varying(3) NOT NULL,
     description numeric(6, 2) NOT NULL,
     quantity integer NOT NULL,
