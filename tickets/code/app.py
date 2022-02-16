@@ -11,6 +11,7 @@ app = Sanic('tickets')
 
 
 app.add_route(web.search, '/search', methods=['POST'])
+app.add_route(web.booking_details, '/booking/<booking_id>', methods=['GET'])
 
 
 @app.route('/search/<search_id>', methods=['GET'])
@@ -30,11 +31,6 @@ async def offer_details(request, offer_id):
 
 @app.route('/booking', methods=['POST'])
 async def create_booking(request):
-    return response.json(get_fake_data(r'tickets/booking.json'))
-
-
-@app.route('/booking/<booking_id>', methods=['GET'])
-async def booking_details(request, booking_id):
     return response.json(get_fake_data(r'tickets/booking.json'))
 
 

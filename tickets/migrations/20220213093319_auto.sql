@@ -5,6 +5,45 @@ CREATE TYPE offer_type AS ENUM ('OW', 'RT');
 CREATE TYPE passenger_type AS ENUM ('ADT', 'CHD', 'INF');
 CREATE TYPE provider AS ENUM ('Amadeus', 'Sabre');
 
+
+-- airport
+CREATE TABLE public.airport
+(
+    id serial NOT NULL,
+    code character varying(3) NOT NULL,
+    name character varying(30) NOT NULL,
+    PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.airport
+    OWNER to postgres;
+
+
+-- route_point
+CREATE TABLE public.route_point
+(
+    id serial NOT NULL UNIQUE,
+    time_at character varying(30) NOT NULL,
+    airport_id integer NOT NULL,
+    terminal character varying(10) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT airport_fkey FOREIGN KEY (airport_id)
+        REFERENCES public.airport (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE NO ACTION
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.route_point
+    OWNER to postgres;
+
+
 -- document
 CREATE TABLE public.document
 (
@@ -182,6 +221,64 @@ ALTER TABLE public.offer
     OWNER to postgres;
 
 
+-- flight
+CREATE TABLE public.flight
+(
+    id bigserial NOT NULL,
+    offer_id bigint NOT NULL,
+    duration integer NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT offer_fkey FOREIGN KEY (offer_id)
+        REFERENCES public.offer (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.flight
+    OWNER to postgres;
+
+
+-- segment
+CREATE TABLE public.segment
+(
+    id serial NOT NULL,
+    flight_id bigint NOT NULL,
+    operating_airline character varying(3) NOT NULL,
+    flight_number character varying(30) NOT NULL,
+    equipment character varying(30) NOT NULL,
+    cabin cabin NOT NULL,
+    departure_id bigint NOT NULL,
+    arrive_id bigint NOT NULL,
+    baggage character varying(5),
+    PRIMARY KEY (id),
+    CONSTRAINT flight_fkey FOREIGN KEY (flight_id)
+        REFERENCES public.flight (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID,
+    CONSTRAINT departure_fkey FOREIGN KEY (departure_id)
+        REFERENCES public.route_point (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT arrive_fkey FOREIGN KEY (arrive_id)
+        REFERENCES public.route_point (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE NO ACTION
+        NOT VALID
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.segment
+    OWNER to postgres;
+
+
 -- price
 CREATE TABLE public.price
 (
@@ -203,5 +300,58 @@ WITH (
 ALTER TABLE public.price
     OWNER to postgres;
 
+INSERT INTO airport
+VALUES (1, 'ALA', 'Алматы');
+
+INSERT INTO airport
+VALUES (2, 'NQZ', 'Нур-Султан (Астана)');
+
+INSERT INTO route_point
+VALUES (1, '2022-02-20T03:25:00+06:00', 1, '1');
+
+INSERT INTO route_point
+VALUES (2, '2022-02-20T05:05:00+06:00', 2, '2');
+
+INSERT INTO route_point
+VALUES (3, '2022-02-21T03:10:00+06:00', 2, '2');
+
+INSERT INTO route_point
+VALUES (4, '2022-02-21T06:45:00+06:00', 1, '1');
+
+INSERT INTO booking
+VALUES (1, '8a5118b7-dd4d-4761-b09e-208b88edcfbe', 'HKBTXK', '2022-01-23T15:10:14.411858+06:00', '+77013748830', 'example@mail.com');
+
+INSERT INTO document
+VALUES (1, 'N09472779', '02.05.2022', '920502300060');
+
+INSERT INTO passenger
+VALUES (1, 'M', 'ADT', 'Umarov', 'Anuarbek', '02.05.1992', 'KZ', 1, 1);
+
+INSERT INTO logo
+VALUES (1, 'https://avia-api.k8s-test.aviata.team/img/5661-501f546c73c976a96cf0d18e600b4d7a.gif', 1416, 274);
+
+INSERT INTO airline
+VALUES (1, 'DV', 'SCAT', 1);
+
+INSERT INTO passengers
+VALUES (1, 1, 0, 0);
+
+INSERT INTO offer
+VALUES (1, 1, '3c0d66ca-47e2-4e4e-9c9f-21b774b64a7f', true, '1PC', 'Economy', 1, 1, 'OW');
+
+INSERT INTO price
+VALUES (1, 120000, 'KZT', 1);
+
+INSERT INTO flight
+VALUES (1, 1, 6000);
+
+INSERT INTO flight
+VALUES (2, 1, 30900);
+
+INSERT INTO segment
+VALUES (1, 1, 'IQ', '843', 'Airbus A300 Freighter', 'Economy', 1, 2, '1PC');
+
+INSERT INTO segment
+VALUES (2, 2, 'IQ', '652', 'Boeing 757', 'Economy', 2, 1, '1PC');
 
 -- migrate:down
