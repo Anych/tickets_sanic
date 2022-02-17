@@ -10,6 +10,7 @@ app = Sanic('tickets')
 
 
 app.add_route(web.search, '/search', methods=['POST'])
+app.add_route(web.search_result, '/search/<search_id>', methods=['GET'])
 app.add_route(web.get_booking, '/booking/<booking_id>', methods=['GET'])
 app.add_route(web.create_booking, '/booking', methods=['POST'], stream=True)
 

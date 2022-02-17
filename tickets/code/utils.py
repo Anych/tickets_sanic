@@ -1,9 +1,16 @@
+import asyncio
 import json
 from datetime import datetime
 
+import aioredis
 import requests
 import xmltodict
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+from tickets.code.settings import SEARCH_EXPIRE_TIME
+
+r = aioredis.Redis()
+pipe = r.pipeline()
 
 
 def get_fake_data(filename):
@@ -42,7 +49,6 @@ async def change_currency_to_kzt(app, data):
                 qty = await app.ctx.redis.hget(data['items'][num]['price']['currency'], 'quant')
             except Exception as e:
                 print(e)
-
                 title = data['items'][num]['price']['currency']
                 async with app.ctx.db_pool.acquire() as conn:
                     currency = await conn.fetch(f"SELECT * FROM currency_exchange WHERE title = '{title}'"
@@ -56,11 +62,26 @@ async def change_currency_to_kzt(app, data):
             data['items'][0]['price']['amount'] = kzt_value
 
 
-async def search_in_providers(request, provider):
+async def search_in_providers(request, provider, uuid_id):
     app = request.app
     request.json['provider'] = provider
     data = requests.post(r'https://avia-api.k8s-test.aviata.team/offers/search', json=request.json).json()
     search_id = data['search_id']
     await change_currency_to_kzt(app, data)
-    await app.ctx.redis.set(request.json['provider'], str(data))
+
+    await app.ctx.redis.hset(uuid_id, provider, search_id)
+    await app.ctx.redis.expire(uuid_id, SEARCH_EXPIRE_TIME)
+
+    await app.ctx.redis.set(search_id, str(data['items']))
+    await app.ctx.redis.expire(search_id, SEARCH_EXPIRE_TIME)
+
+    for offer in data['items']:
+        await app.ctx.redis.set(offer['id'], str(offer)).expire(offer['id'], SEARCH_EXPIRE_TIME)
+        await app.ctx.redis.expire(offer['id'], SEARCH_EXPIRE_TIME)
     return search_id
+
+
+async def kill_search(request, name):
+    await asyncio.sleep(30)
+    await request.app.cancel_task(name)
+
