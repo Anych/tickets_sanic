@@ -105,19 +105,3 @@ async def get_booking(request, booking_id):
             details['offer'][0]['passengers'] = passengers_qty
             details['passengers'] = passengers
         return response.json(details, dumps=json.dumps, default=str)
-
-
-async def create_booking(request):
-    async with request.app.ctx.db_pool.acquire() as conn:
-        transaction = conn.transaction()
-        await transaction.start()
-        try:
-            await conn.execute('INSERT INTO offer(id, name, person) VALUES($1, $2, $3)', 1, 'IT', 'Employer')
-            await conn.execute('UPDATE employees SET department = $2 WHERE id = $1', 1, 'IT')
-        except Exception as e:
-            print(e)
-            await transaction.rollback()
-            raise
-        else:
-            await transaction.commit()
-    return response.json({})

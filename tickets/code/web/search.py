@@ -17,21 +17,20 @@ async def create_search(request):
 
 async def search_result(request, search_id):
     app = request.app
-    result = {'search_id': search_id, 'status': None, 'items': ''}
+    result = {'search_id': search_id, 'status': None, 'items': []}
 
     try:
         amadeus_id = await app.ctx.redis.hget(search_id, 'Amadeus')
-        amadeus_result = await app.ctx.redis.get(amadeus_id)
-        result['items'] += amadeus_result
+        amadeus_result = eval(await app.ctx.redis.get(amadeus_id))
+        result['items'].append(amadeus_result)
     except Exception as e:
         print(e)
-        print(123)
         result['status'] = 'PENDING'
 
     try:
         sabre_id = await app.ctx.redis.hget(search_id, 'Sabre')
-        sabre_result = await app.ctx.redis.get(sabre_id)
-        result['items'] += sabre_result
+        sabre_result = eval(await app.ctx.redis.get(sabre_id))
+        result['items'].append(sabre_result)
     except Exception as e:
         print(e)
         result['status'] = 'PENDING'

@@ -76,7 +76,7 @@ async def search_in_providers(request, provider, uuid_id):
     await app.ctx.redis.expire(search_id, SEARCH_EXPIRE_TIME)
 
     for offer in data['items']:
-        await app.ctx.redis.set(offer['id'], str(offer)).expire(offer['id'], SEARCH_EXPIRE_TIME)
+        await app.ctx.redis.set(offer['id'], str(offer))
         await app.ctx.redis.expire(offer['id'], SEARCH_EXPIRE_TIME)
     return search_id
 
@@ -84,4 +84,3 @@ async def search_in_providers(request, provider, uuid_id):
 async def kill_search(request, name):
     await asyncio.sleep(30)
     await request.app.cancel_task(name)
-
