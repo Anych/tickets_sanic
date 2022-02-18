@@ -105,3 +105,10 @@ async def get_booking(request, booking_id):
             details['offer'][0]['passengers'] = passengers_qty
             details['passengers'] = passengers
         return response.json(details, dumps=json.dumps, default=str)
+
+
+async def create_booking(request):
+    app = request.app
+    data = request.json
+    print(data)
+    return response.text('asd')
