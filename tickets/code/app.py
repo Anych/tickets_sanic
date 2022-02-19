@@ -20,8 +20,8 @@ app.add_route(web.create_booking, '/booking', methods=['POST'])
 async def init_before(app, loop):
     app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
     app.ctx.redis = await aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
-    await rate_exchange(app)
-    await initialize_scheduler(app, loop)
+    # await rate_exchange(app)
+    # await initialize_scheduler(app, loop)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 import asyncio
-import time
 from datetime import datetime
 
 import httpx
@@ -80,3 +79,10 @@ async def search_in_providers(request, provider, uuid_id):
         for offer in data['items']:
             await redis_conn.set(offer['id'], str(offer))
             await redis_conn.expire(offer['id'], SEARCH_EXPIRE_TIME)
+
+
+async def create_booking_in_provider(request):
+    async with httpx.AsyncClient() as client:
+        data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
+                                 json=request.json, timeout=60)
+        return data.json()

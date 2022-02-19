@@ -12,7 +12,7 @@ RUN chmod +x /usr/local/bin/dbmate
 
 RUN useradd -m -d /proj -s /bin/bash app
 WORKDIR /proj
-COPY .. /proj
+COPY . /proj
 RUN chown -R app:app /proj/*
 
 USER app

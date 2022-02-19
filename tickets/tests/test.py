@@ -85,13 +85,17 @@ x = {
     "amount": 120693,
     "currency": "KZT"
   },
-  "refundable": true,
+  "refundable": True,
   "baggage": "20KG",
   "cabin": "Economy",
   "airline": {
     "code": "ТЫ",
     "name": "Tulpar Air",
-    "logo": null
+    "logo": {
+                "url": "https://avia-api.k8s-test.aviata.team/img/5805-57a5cfb89ab77b4a3c11ff3a5c7ff427.png",
+                "width": 284,
+                "height": 105
+            }
   },
   "passengers": {
     "ADT": 1,
@@ -100,3 +104,4 @@ x = {
   },
   "type": "RT"
 }
+print(x["airline"]['logo']['url'])
