@@ -49,7 +49,9 @@ async def search_result(request, search_id):
             print(e)
             result['status'] = 'PENDING'
 
-        if result['status'] is None or time.time() - float(start_time) > 30 and result['status'] == 'PENDING':
+        if result['status'] is None and time.time() - float(start_time) > 30:
+            result['status'] = 'Ничего не найдено, попробуйте еще раз через несколько секунд.'
+        if time.time() - float(start_time) > 30 and result['status'] == 'PENDING':
             result['status'] = 'DONE'
         expired = await redis_conn.hgetall(search_id)
         if expired == {}:

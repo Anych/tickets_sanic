@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+import datetime
 
 import httpx
 import xmltodict
@@ -9,7 +9,7 @@ from tickets.code.settings import SEARCH_EXPIRE_TIME
 
 
 async def rate_exchange(app):
-    date = datetime.today().strftime('%d.%m.%Y')
+    date = datetime.datetime.today().strftime('%d.%m.%Y')
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(f'https://www.nationalbank.kz/rss/get_rates.cfm?fdate={date}')
@@ -86,3 +86,7 @@ async def create_booking_in_provider(request):
         data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
                                  json=request.json, timeout=60)
         return data.json()
+
+
+async def check_if_booking_was_expire(time):
+    return datetime.datetime.now().astimezone() > datetime.datetime.fromisoformat(time)

@@ -28,7 +28,7 @@ CREATE TABLE public.route_point
     id serial NOT NULL UNIQUE,
     time_at character varying(30) NOT NULL,
     airport_id integer NOT NULL,
-    terminal character varying(10) NOT NULL,
+    terminal character varying(10),
     PRIMARY KEY (id),
     CONSTRAINT airport_fkey FOREIGN KEY (airport_id)
         REFERENCES public.airport (id) MATCH SIMPLE
@@ -285,7 +285,7 @@ CREATE TABLE public.price
     id bigserial NOT NULL UNIQUE,
     price numeric(8) NOT NULL,
     currency character varying(3) NOT NULL,
-    offer_id bigint NOT NULL UNIQUE,
+    offer_id bigint NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT offer_fkey FOREIGN KEY (offer_id)
         REFERENCES public.offer (id) MATCH SIMPLE
