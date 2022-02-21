@@ -4,9 +4,11 @@ import uuid
 from sanic import response
 
 from tickets.code.utils import search_in_providers
+from tickets.code.validators import SearchValidator
 
 
 async def create_search(request):
+    x = await SearchValidator(request.json).prepare_data()
     uuid_id = str(uuid.uuid1())
     try:
         provider = request.json['provider']
