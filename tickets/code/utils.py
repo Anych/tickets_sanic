@@ -86,7 +86,3 @@ async def create_booking_in_provider(request):
         data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
                                  json=request.json, timeout=60)
         return data.json()
-
-
-async def check_if_booking_was_expire(time):
-    return datetime.datetime.now().astimezone() > datetime.datetime.fromisoformat(time)

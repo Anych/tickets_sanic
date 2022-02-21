@@ -46,5 +46,5 @@ services:
 
 networks:
   default:
-    external:
-      name: tickets-platform
+    external: true
+    name: app-platform

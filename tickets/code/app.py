@@ -2,7 +2,7 @@ import aioredis
 import asyncpg
 from sanic import Sanic
 
-from tickets.code import settings, web
+from . import settings, web
 from tickets.code.utils import rate_exchange, initialize_scheduler
 
 app = Sanic('tickets')
