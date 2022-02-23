@@ -1,9 +1,10 @@
 import aioredis
 import asyncpg
-from sanic import Sanic
+import cerberus
+from sanic import Sanic, exceptions
 
+from tickets.code.errors import *
 from . import settings, web
-from tickets.code.utils import rate_exchange, initialize_scheduler
 
 app = Sanic('tickets')
 
@@ -13,15 +14,17 @@ app.add_route(web.search_result, '/search/<search_id>', methods=['GET'])
 app.add_route(web.get_offer, '/offers/<offer_id>', methods=['GET'])
 app.add_route(web.create_booking, '/booking', methods=['POST'])
 app.add_route(web.get_booking, '/booking/<booking_id>', methods=['GET'])
-app.add_route(web.get_bookings_filter, '/booking', methods=['GET'])
+app.add_route(web.search_booking, '/booking', methods=['GET'])
+
+app.error_handler.add(cerberus.SchemaError, validation_error_handler)
+app.error_handler.add(BookingCreateException, booking_create_error_handler)
+app.error_handler.add(exceptions.NotFound, booking_create_error_handler)
 
 
 @app.listener("before_server_start")
 async def init_before(app, loop):
     app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
     app.ctx.redis = await aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
-    # await rate_exchange(app)
-    # await initialize_scheduler(app, loop)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,8 @@
 FROM python:3.10-slim
 
 COPY ../../requirements.txt /tmp/requirements.txt
+COPY ../../migrations/migrate /bin/migrate
+COPY ../../migrations/makemigrations /bin/makemigrations
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r /tmp/requirements.txt

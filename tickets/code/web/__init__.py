@@ -3,4 +3,4 @@ from .search import search_result
 from .offers import get_offer
 from .booking import create_booking
 from .booking import get_booking
-from .booking import get_bookings_filter
+from .booking import search_booking

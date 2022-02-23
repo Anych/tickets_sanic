@@ -1,31 +1,98 @@
-import asyncio
-import datetime
+import json
 
 import httpx
-import xmltodict
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from tickets.code.currencies import update_rate_exchange
 from tickets.code.settings import SEARCH_EXPIRE_TIME
 
 
-async def rate_exchange(app):
-    date = datetime.datetime.today().strftime('%d.%m.%Y')
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f'https://www.nationalbank.kz/rss/get_rates.cfm?fdate={date}')
-        except Exception as e:
-            print(e)
-            await asyncio.sleep(30)
-            await rate_exchange(app)
+async def get_currency_rates(redis):
+    async with redis as redis_conn:
+        currencies = await redis_conn.hgetall('currencies')
 
-        rates = xmltodict.parse(response.text)
-        for rate in rates['rates']['item']:
-            currency = {'description': rate['description'], 'quant': rate['quant']}
-            async with app.ctx.redis as redis_conn:
-                await redis_conn.hset(rate['title'], mapping=currency)
-            async with app.ctx.db_pool.acquire() as conn:
-                await conn.execute('INSERT INTO currency_exchange(title, description, quantity) VALUES($1, $2, $3)',
-                                   rate['title'], rate['description'], int(rate['quant']))
+    currencies_dict = dict()
+    for title, value in currencies.items():
+        try:
+            value = json.loads(value)
+            currencies_dict[title] = value
+        except json.decoder.JSONDecodeError:
+            pass
+
+    return currencies_dict
+
+
+async def change_currency_to_kzt(offers, redis):
+    currencies = await get_currency_rates(redis)
+    for offer in offers:
+        if offer['price']['currency'] == 'KZT':
+            continue
+
+        else:
+            currency_values = currencies[offer['price']['currency']]
+            value = float(currency_values['description'])
+            qty = int(currency_values['quant'])
+            kzt_value = int(offer['price']['amount'] * float(value) / int(qty))
+            offer['price']['currency'] = 'KZT'
+            offer['price']['amount'] = kzt_value
+
+
+async def check_if_searching_is_done(redis_conn, search_id):
+    if len(await redis_conn.hgetall(search_id)) == 3:
+        await redis_conn.hset(search_id, 'status', 'DONE')
+    else:
+        await redis_conn.hset(search_id, 'status', 'PENDING')
+    await redis_conn.expire(search_id, SEARCH_EXPIRE_TIME)
+
+
+async def get_data_from_provider(data):
+    try:
+        async with httpx.AsyncClient() as client:
+            data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/search',
+                                     json=data, timeout=30)
+    except Exception as e:
+        print(e)
+        data = None
+
+    return data
+
+
+async def search_in_providers(request, provider, search_id):
+    app = request.app
+    async with app.ctx.redis as redis_conn:
+        request.json['provider'] = provider
+        await redis_conn.hset(search_id, 'status', 'PENDING')
+    data = await get_data_from_provider(request.json)
+
+    async with app.ctx.redis.pipeline(transaction=True) as pipe:
+        if data:
+            data = data.json()
+            provider_id = data['search_id']
+
+            await change_currency_to_kzt(data['items'], app.ctx.redis)
+            await pipe.hset(search_id, provider, provider_id)
+
+            items = json.dumps(data['items'])
+            await pipe.set(provider_id, items)
+            await pipe.expire(provider_id, SEARCH_EXPIRE_TIME)
+
+            for item in data['items']:
+                offer = json.dumps(item)
+                await pipe.set(item['id'], offer)
+                await pipe.expire(item['id'], SEARCH_EXPIRE_TIME)
+
+        else:
+            await pipe.hset(search_id, provider, 'timeout error')
+        await pipe.execute()
+        await check_if_searching_is_done(app.ctx.redis, search_id)
+
+
+async def create_booking_in_provider(request):
+    async with httpx.AsyncClient() as client:
+        data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
+                                 json=request.json, timeout=60)
+
+        return data.json()
 
 
 async def initialize_scheduler(app, loop):
@@ -33,56 +100,6 @@ async def initialize_scheduler(app, loop):
         'event_loop': loop,
         'apscheduler.timezone': 'Asia/Almaty',
     })
-    scheduler.add_job(rate_exchange, 'cron', day='*', hour=12, minute=0, args=[app])
+    scheduler.add_job(update_rate_exchange, 'cron', day='*', hour=12, minute=0)
+
     return scheduler.start()
-
-
-async def change_currency_to_kzt(app, data, redis_conn):
-    for num in range(len(data['items'])):
-        if data['items'][num]['price']['currency'] != 'KZT':
-            try:
-                value = await redis_conn.hget(data['items'][num]['price']['currency'], 'description')
-                qty = await redis_conn.hget(data['items'][num]['price']['currency'], 'quant')
-            except Exception as e:
-                print(e)
-                async with app.ctx.db_pool.acquire() as db_conn:
-                    title = data['items'][num]['price']['currency']
-                    currency = await db_conn.fetch(f"SELECT * FROM currency_exchange WHERE title = '{title}'"
-                                                   f" ORDER BY TIMESTAMP DESC LIMIT 1")
-                    currency = [{'description': d['description'], 'quantity': d['quantity']} for d in currency][0]
-                    value = currency['description']
-                    qty = currency['qty']
-
-            kzt_value = int(data['items'][num]['price']['amount'] * float(value) / int(qty))
-            data['items'][num]['price']['currency'] = 'KZT'
-            data['items'][0]['price']['amount'] = kzt_value
-
-
-async def search_in_providers(request, provider, uuid_id):
-    app = request.app
-    async with app.ctx.redis as redis_conn:
-        request.json['provider'] = provider
-        async with httpx.AsyncClient() as client:
-            data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/search',
-                                     json=request.json, timeout=30)
-
-        data = data.json()
-        search_id = data['search_id']
-        await change_currency_to_kzt(app, data, redis_conn)
-
-        await redis_conn.hset(uuid_id, provider, search_id)
-        await redis_conn.expire(uuid_id, SEARCH_EXPIRE_TIME)
-
-        await redis_conn.set(search_id, str(data['items']))
-        await redis_conn.expire(search_id, SEARCH_EXPIRE_TIME)
-
-        for offer in data['items']:
-            await redis_conn.set(offer['id'], str(offer))
-            await redis_conn.expire(offer['id'], SEARCH_EXPIRE_TIME)
-
-
-async def create_booking_in_provider(request):
-    async with httpx.AsyncClient() as client:
-        data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
-                                 json=request.json, timeout=60)
-        return data.json()

@@ -1,61 +1,44 @@
-import time
+import json
 import uuid
 
-from sanic import response
+import aioredis
+import cerberus
+from sanic import response, exceptions
 
 from tickets.code.utils import search_in_providers
 from tickets.code.validators import SearchValidator
 
 
 async def create_search(request):
-    x = await SearchValidator(request.json).prepare_data()
-    uuid_id = str(uuid.uuid1())
-    try:
-        provider = request.json['provider']
-        request.app.add_task(search_in_providers(request, provider, uuid_id), name=f'{provider} {uuid_id}')
-        if provider == 'Amadeus':
-            request.app.add_task(search_in_providers(request, 'Sabre', uuid_id), name=f'Sabre {uuid_id}')
-        else:
-            request.app.add_task(search_in_providers(request, 'Amadeus', uuid_id), name=f'Amadeus {uuid_id}')
+    validated = await SearchValidator(request.json).prepare_data()
+    if not validated:
+        raise cerberus.SchemaError
 
-    except KeyError:
-        request.app.add_task(search_in_providers(request, 'Amadeus', uuid_id), name=f'Amadeus {uuid_id}')
-        request.app.add_task(search_in_providers(request, 'Sabre', uuid_id), name=f'Sabre {uuid_id}')
+    search_id = str(uuid.uuid1())
+    request.app.add_task(search_in_providers(request, 'Amadeus', search_id), name=f'Amadeus {search_id}')
+    request.app.add_task(search_in_providers(request, 'Sabre', search_id), name=f'Sabre {search_id}')
 
-    start_time = time.time()
-    async with request.app.ctx.redis as redis_conn:
-        await redis_conn.hset(uuid_id, 'starting_time', start_time)
-    return response.json({'search_id': uuid_id})
+    return response.json({'search_id': search_id})
 
 
 async def search_result(request, search_id):
     app = request.app
-    result = {'search_id': search_id, 'status': None, 'items': []}
+    result = {'search_id': search_id, 'status': 'PENDING', 'items': []}
+
     async with app.ctx.redis as redis_conn:
-        start_time = await redis_conn.hget(search_id, 'starting_time')
-        if start_time is None:
-            start_time = 0
-        try:
-            amadeus_id = await redis_conn.hget(search_id, 'Amadeus')
-            amadeus_result = eval(await redis_conn.get(amadeus_id))
-            result['items'].append(amadeus_result)
-        except Exception as e:
-            print(e)
-            result['status'] = 'PENDING'
-
-        try:
-            sabre_id = await redis_conn.hget(search_id, 'Sabre')
-            sabre_result = eval(await redis_conn.get(sabre_id))
-            result['items'].append(sabre_result)
-        except Exception as e:
-            print(e)
-            result['status'] = 'PENDING'
-
-        if result['status'] is None and time.time() - float(start_time) > 30:
-            result['status'] = 'Ничего не найдено, попробуйте еще раз через несколько секунд.'
-        if time.time() - float(start_time) > 30 and result['status'] == 'PENDING':
-            result['status'] = 'DONE'
-        expired = await redis_conn.hgetall(search_id)
-        if expired == {}:
-            result['status'] = 'EXPIRED'
+        for provider in ['Amadeus', 'Sabre']:
+            try:
+                provider_id = await redis_conn.hget(search_id, provider)
+                if provider_id != 'timeout error':
+                    provider_result = await redis_conn.get(provider_id)
+                    provider_result = json.loads(provider_result)
+                    result['items'].append(provider_result)
+            except aioredis.exceptions.DataError:
+                pass
+        result['status'] = await redis_conn.hget(search_id, 'status')
+        print(await redis_conn.hget(search_id, 'status'))
+        status = await redis_conn.hgetall(search_id)
+    print(status)
+    if status == {}:
+        raise exceptions.NotFound
     return response.json(result)

@@ -21,7 +21,7 @@ services:
     volumes:
       - .:/proj
     command: >
-      sh -c "dbmate -d tickets/migrations --no-dump-schema migrate &&
+      sh -c "dbmate -d /bin/migrate --no-dump-schema migrate &&
              python -m tickets.code.app"
     stdin_open: true
     tty: true
@@ -43,6 +43,20 @@ services:
 
   redis:
     image: redis:7.0-rc1-alpine
+
+  currencies-worker:
+    build:
+      context: .
+      dockerfile: tickets/docker/Dockerfile
+    volumes:
+      - .:/proj
+      - /proj/bin
+    environment:
+      - DEBUG=True
+      - REDIS_URL=redis://redis:6379
+    command: python -m tickets.code.currencies
+    stdin_open: true
+    tty: true
 
 networks:
   default:
