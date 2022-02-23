@@ -18,7 +18,8 @@ app.add_route(web.search_booking, '/booking', methods=['GET'])
 
 app.error_handler.add(cerberus.SchemaError, validation_error_handler)
 app.error_handler.add(BookingCreateException, booking_create_error_handler)
-app.error_handler.add(exceptions.NotFound, booking_create_error_handler)
+app.error_handler.add(exceptions.NotFound, not_fount_error_handler)
+app.error_handler.add(Exception, server_error_handler)
 
 
 @app.listener("before_server_start")
