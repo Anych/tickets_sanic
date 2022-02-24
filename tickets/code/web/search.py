@@ -10,8 +10,8 @@ from tickets.code.validators import SearchValidator
 
 
 async def create_search(request):
-    validated = await SearchValidator(request.json).prepare_data()
-    if not validated:
+    is_validated = await SearchValidator(request.json).prepare_data()
+    if not is_validated:
         raise cerberus.SchemaError
 
     search_id = str(uuid.uuid1())

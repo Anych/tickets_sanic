@@ -44,7 +44,7 @@ services:
   redis:
     image: redis:7.0-rc1-alpine
 
-  currencies-worker:
+  currencies-countries-worker:
     build:
       context: .
       dockerfile: tickets/docker/Dockerfile
@@ -54,7 +54,7 @@ services:
     environment:
       - DEBUG=True
       - REDIS_URL=redis://redis:6379
-    command: python -m tickets.code.currencies
+    command: python -m tickets.code.currencies_countries
     stdin_open: true
     tty: true
 

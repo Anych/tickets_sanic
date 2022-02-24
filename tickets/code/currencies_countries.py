@@ -27,5 +27,22 @@ async def update_rate_exchange():
                 await redis_conn.hset('currencies', rate['title'], currency)
 
 
+async def get_countries():
+    redis = await aioredis.from_url(url=os.environ['REDIS_URL'])
+    async with httpx.AsyncClient() as client:
+        try:
+            countries = await client.get('https://avia-api.k8s-test.aviata.team/countries')
+            countries = countries.json()['items']
+            countries = json.dumps(countries)
+        except Exception as e:
+            print(e)
+            await asyncio.sleep(30)
+            await get_countries()
+
+        async with redis as redis_conn:
+            await redis_conn.set('countries', countries)
+
+
 if __name__ == '__main__':
     asyncio.run(update_rate_exchange())
+    asyncio.run(get_countries())

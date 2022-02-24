@@ -3,7 +3,7 @@ import json
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from tickets.code.currencies import update_rate_exchange
+from tickets.code.currencies_countries import update_rate_exchange
 from tickets.code.settings import SEARCH_EXPIRE_TIME
 
 

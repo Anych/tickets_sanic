@@ -1,10 +1,12 @@
 import json
 import datetime
 
+import cerberus
 from sanic import response, exceptions
 
 from tickets.code.errors import BookingCreateException
 from tickets.code.utils import create_booking_in_provider
+from tickets.code.validators import PassengerValidator
 
 
 async def get_booking(request, booking_id):
@@ -25,16 +27,26 @@ async def get_booking(request, booking_id):
 
 
 async def create_booking(request):
-    data = await create_booking_in_provider(request)
 
+    async with request.app.ctx.redis as redis_conn:
+        countries = await redis_conn.get('countries')
+        countries = json.loads(countries)
+    for passenger in request.json['passengers']:
+        is_validated = await PassengerValidator(passenger, countries).prepare_data()
+        if not is_validated:
+            raise cerberus.SchemaError
+
+    data = await create_booking_in_provider(request)
     if 'detail' in data.keys():
         raise exceptions.NotFound
-
     else:
+
         offer = data['offer']
         offer = json.dumps(offer)
+
         passengers = data['passengers']
         passengers = json.dumps(passengers)
+
         async with request.app.ctx.db_pool.acquire() as db_conn:
             transaction = db_conn.transaction()
             await transaction.start()
