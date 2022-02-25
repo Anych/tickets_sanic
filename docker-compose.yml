@@ -21,8 +21,7 @@ services:
     volumes:
       - .:/proj
     command: >
-      sh -c "dbmate -d /bin/migrate --no-dump-schema migrate &&
-             python -m tickets.code.app"
+      sh -c "python -m tickets.code.app"
     stdin_open: true
     tty: true
     depends_on:
