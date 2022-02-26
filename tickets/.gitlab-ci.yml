@@ -1,0 +1,40 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+.variables: &vars
+  SERVICE_NAME: tickets
+  NAMESPACE: dev
+  BUILD_DOCKERFILE: ./docker/Dockerfile
+  BUILD_IMAGE: $CI_REGISTRY_IMAGE:b$CI_PIPELINE_ID
+  BUILD_IMAGE_LATEST: $CI_REGISTRY_IMAGE:latest
+  DEBUG: "False"
+  APP_DOMAIN: $SERVICE_NAME.k8s-test.aviata.team
+  BASE_URL: https://$APP_DOMAIN
+  REPLICA_COUNT: 1
+  REDIS_URL: redis://redis:6379
+
+build image:
+  stage: build
+  image: docker:latest
+  variables:
+    <<: *vars
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $BUILD_IMAGE -f $BUILD_DOCKERFILE .
+    - docker push $BUILD_IMAGE
+    - docker tag $BUILD_IMAGE $BUILD_IMAGE_LATEST
+    - docker push $BUILD_IMAGE_LATEST
+
+deploy k8s:
+  stage: deploy
+  image:
+    name: tripforme/kubectl-env:latest
+  variables:
+    <<: *vars
+  script:
+    - kubectl kustomize manifests | envsubst | kubectl apply -f -

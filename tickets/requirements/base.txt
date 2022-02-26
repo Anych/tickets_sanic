@@ -1,0 +1,8 @@
+sanic==21.*
+aioredis==2.*
+asyncpg
+httpx
+xmltodict
+cerberus
+ujson
+APScheduler
