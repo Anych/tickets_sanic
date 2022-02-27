@@ -1,0 +1,11 @@
+{
+  "provider": "Amadeus",
+  "cabin": "Economy",
+  "origin": "ALA",
+  "destination": "NQZ",
+  "dep_at": "2022-05-01",
+  "arr_at": "2022-05-02",
+  "adults": 1,
+  "children": 0,
+  "infants": 0
+}

@@ -1,0 +1,106 @@
+{
+    "id": "bc718431-0718-43f0-a384-616a520ab601",
+    "flights": [
+        {
+            "duration": 13500,
+            "segments": [
+                {
+                    "operating_airline": "IP",
+                    "flight_number": "727",
+                    "equipment": "Boeing 727 Freighter",
+                    "cabin": "Economy",
+                    "dep": {
+                        "at": "2022-03-20T03:10:00+06:00",
+                        "airport": {
+                            "code": "ALA",
+                            "name": "Алматы"
+                        },
+                        "terminal": "8"
+                    },
+                    "arr": {
+                        "at": "2022-03-20T06:55:00+06:00",
+                        "airport": {
+                            "code": "NQZ",
+                            "name": "Нур-Султан (Астана)"
+                        },
+                        "terminal": "8"
+                    },
+                    "baggage": "20KG"
+                }
+            ]
+        },
+        {
+            "duration": 17700,
+            "segments": [
+                {
+                    "operating_airline": "IP",
+                    "flight_number": "1000",
+                    "equipment": "Airbus A300",
+                    "cabin": "Economy",
+                    "dep": {
+                        "at": "2022-03-21T03:00:00+06:00",
+                        "airport": {
+                            "code": "NQZ",
+                            "name": "Нур-Султан (Астана)"
+                        },
+                        "terminal": "4"
+                    },
+                    "arr": {
+                        "at": "2022-03-21T07:45:00+06:00",
+                        "airport": {
+                            "code": "UKK",
+                            "name": "Усть-Каменогорск"
+                        },
+                        "terminal": "1"
+                    },
+                    "baggage": "20KG"
+                },
+                {
+                    "operating_airline": "IP",
+                    "flight_number": "919",
+                    "equipment": "Boeing 757-200",
+                    "cabin": "Economy",
+                    "dep": {
+                        "at": "2022-03-21T11:35:00+06:00",
+                        "airport": {
+                            "code": "UKK",
+                            "name": "Усть-Каменогорск"
+                        },
+                        "terminal": "8"
+                    },
+                    "arr": {
+                        "at": "2022-03-21T11:45:00+06:00",
+                        "airport": {
+                            "code": "ALA",
+                            "name": "Алматы"
+                        },
+                        "terminal": "5"
+                    },
+                    "baggage": "20KG"
+                }
+            ]
+        }
+    ],
+    "price": {
+        "amount": 120630,
+        "currency": "KZT"
+    },
+    "refundable": true,
+    "baggage": "20KG",
+    "cabin": "Economy",
+    "airline": {
+        "code": "IP",
+        "name": "Atyrau Aue Zholy",
+        "logo": {
+            "url": "https://avia-api.k8s-test.aviata.team/img/2709-493e616c4f2455a0e9abda68b529ea61.jpeg",
+            "width": 82,
+            "height": 82
+        }
+    },
+    "passengers": {
+        "ADT": 1,
+        "CHD": 0,
+        "INF": 0
+    },
+    "type": "RT"
+}

@@ -10,7 +10,6 @@ from code.validators import SearchValidator
 
 
 async def create_search(request):
-    print(request.json)
     is_validated = await SearchValidator(request.json).prepare_data()
     if not is_validated:
         raise cerberus.SchemaError
@@ -37,9 +36,9 @@ async def search_result(request, search_id):
             except aioredis.exceptions.DataError:
                 pass
         result['status'] = await redis_conn.hget(search_id, 'status')
-        print(await redis_conn.hget(search_id, 'status'))
         status = await redis_conn.hgetall(search_id)
-    print(status)
+
     if status == {}:
         raise exceptions.NotFound
+
     return response.json(result)
