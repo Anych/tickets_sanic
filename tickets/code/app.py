@@ -23,14 +23,15 @@ app.error_handler.add(Exception, server_error_handler)
 
 @app.listener("before_server_start")
 async def init_before(app, loop):
-    # app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
+    app.ctx.db_pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL)
     app.ctx.redis = await aioredis.from_url(settings.REDIS_URL, decode_responses=True, max_connections=50)
 
 
 @app.listener('after_server_stop')
 async def cleanup(app, loop):
     await app.ctx.redis.close()
+    await app.ctx.db_pool.close()
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.0', port=8000, debug=settings.DEBUG)
+    app.run(host='0.0.0.0', port=8000, debug=settings.DEBUG)

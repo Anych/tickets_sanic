@@ -1,21 +1,19 @@
+import asyncio
 import os
 import sys
 
+import asyncpg
 import ujson
 from pytest import fixture
+
 from sanic import Sanic
 
 from utils import load_file
 
 PROJECT_ROOT = os.path.abspath(os.path.join(
-                  os.path.dirname(__file__),
-                  os.pardir))
+    os.path.dirname(__file__),
+    os.pardir))
 sys.path.insert(0, PROJECT_ROOT)
-
-
-@fixture
-def search_data():
-    return ujson.loads(load_file('tests/data/details_for_search.json'))
 
 
 @fixture
@@ -29,6 +27,21 @@ async def app():
     test_app.register_listener(sanic_app.cleanup, 'after_server_stop')
 
     return test_app
+
+
+@fixture
+async def database(app):
+    from code.settings import TEST_DATABASE_URL
+    try:
+        app.ctx.testing_db = await asyncpg.create_pool(dsn=TEST_DATABASE_URL)
+
+    finally:
+        await app.ctx.testing_db.close()
+
+
+@fixture
+def search_data():
+    return ujson.loads(load_file('tests/data/details_for_search.json'))
 
 
 @fixture

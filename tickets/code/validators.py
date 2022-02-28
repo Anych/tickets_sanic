@@ -16,10 +16,11 @@ class TicketsValidator:
         try:
             for func in self.validate_functions:
                 await func()
-                if not self.is_validated:
-
-                    return False
-            return True
+                if self.is_validated:
+                    continue
+                else:
+                    return self.is_validated
+            return self.is_validated
         except Exception as e:
             print(e)
             return False
@@ -93,14 +94,7 @@ class SearchValidator(TicketsValidator):
         self.is_validated = self.v.validate({'passenger_type': self.data['adults']})
 
     async def validate_qty_of_passengers(self):
-        if 'children' and 'infants' in self.data.keys():
-            passengers_qty = self.data['adults'] + self.data['children'] + self.data['infants']
-        elif 'infants' in self.data.keys():
-            passengers_qty = self.data['adults'] + self.data['infants']
-        elif 'children' in self.data.keys():
-            passengers_qty = self.data['adults'] + self.data['children']
-        else:
-            passengers_qty = self.data['adults']
+        passengers_qty = self.data['adults'] + self.data['children'] + self.data['infants']
         self.v.schema = {'passengers_qty': {'type': 'integer', 'min': 1, 'max': 9}}
         passengers_qty = int(passengers_qty)
         self.is_validated = self.v.validate({'passengers_qty': passengers_qty})

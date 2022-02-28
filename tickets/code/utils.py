@@ -9,10 +9,11 @@ from code.settings import SEARCH_EXPIRE_TIME
 async def get_currency_rates(redis):
     async with redis as redis_conn:
         currencies = await redis_conn.hgetall('currencies')
-
+    print(currencies, 123123312231)
     currencies_dict = dict()
     for title, value in currencies.items():
         try:
+            title = ujson.loads(title)
             value = ujson.loads(value)
             currencies_dict[title] = value
         except Exception as e:
