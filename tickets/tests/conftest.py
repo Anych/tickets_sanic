@@ -32,11 +32,17 @@ async def app():
 @fixture
 async def database(app):
     from code.settings import TEST_DATABASE_URL
+
+    table = load_file('tests/data/create_booking.sql')
     try:
         app.ctx.testing_db = await asyncpg.create_pool(dsn=TEST_DATABASE_URL)
+        async with app.ctx.testing_db.acquire() as db_conn:
+            await db_conn.execute(f'{table}')
 
     finally:
-        await app.ctx.testing_db.close()
+        async with app.ctx.testing_db.acquire() as db_conn:
+            await db_conn.execute('DROP TABLE IF EXISTS public.booking; DROP SCHEMA test CASCADE;')
+            await app.ctx.testing_db.close()
 
 
 @fixture
