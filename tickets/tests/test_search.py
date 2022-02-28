@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 from aioredis import Redis, exceptions
 
 
-def test_create_search_success(app, mocker, fake_uuid, search_data, database):
+def test_create_search_success(app, mocker, fake_uuid, search_data):
     mocker.patch('uuid.uuid1', return_value=fake_uuid)
     request, response = app.test_client.post('/search', json=search_data)
 
