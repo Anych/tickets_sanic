@@ -1,0 +1,20 @@
+{
+  "offer_id": "3fa5b534-d278-408c-a5bb-6652fce70651",
+  "phone": "+77777777777",
+  "email": "user@example.com",
+  "passengers": [
+    {
+      "gender": "M",
+      "type": "ADT",
+      "first_name": "CRAIGE",
+      "last_name": "BENSEN",
+      "date_of_birth": "1987-01-24",
+      "citizenship": "US",
+      "document": {
+        "number": "N234346356",
+        "expires_at": "2025-01-24",
+        "iin": "123456789123"
+      }
+    }
+  ]
+}

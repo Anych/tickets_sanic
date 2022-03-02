@@ -110,7 +110,6 @@ class PassengerValidator(TicketsValidator):
                                    self.validate_document_expires_at, self.validate_iin)
         self.countries = countries
         self.document = self.data['document']
-        self.prepare_data()
 
     async def validate_gender(self):
         self.v.schema = {'gender': {'required': True, 'type': 'string', 'allowed': ['M', 'F']}}
@@ -122,7 +121,7 @@ class PassengerValidator(TicketsValidator):
 
     async def validate_citizenship(self):
         citizenship = self.data['citizenship']
-        for country in self.countries:
+        for country in self.countries['items']:
             if country['code'] == citizenship:
                 self.is_validated = True
                 break

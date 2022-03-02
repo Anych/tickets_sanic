@@ -13,7 +13,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
+      dockerfile: docker/Dockerfile
     environment:
       <<: *environment-vars
     ports:
@@ -45,7 +45,7 @@ services:
   currencies-countries-worker:
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
+      dockerfile: docker/Dockerfile
     volumes:
       - .:/proj
       - /proj/bin
@@ -58,5 +58,4 @@ services:
 
 networks:
   default:
-    external: true
     name: app-platform

@@ -1,0 +1,128 @@
+{
+    "id": "4ae04175-3415-4f10-b8fd-ffa9146f53d9",
+    "pnr": "XUWN2H",
+    "expires_at": "2022-03-01T22:56:25.585974+06:00",
+    "phone": "+77777777777",
+    "email": "user@example.com",
+    "offer": {
+        "id": "c086bcb6-7ad1-4173-a166-150ec37a7e52",
+        "flights": [
+            {
+                "duration": 7800,
+                "segments": [
+                    {
+                        "operating_airline": "DV",
+                        "flight_number": "705",
+                        "equipment": "Airbus A310-200",
+                        "cabin": "Economy",
+                        "dep": {
+                            "at": "2022-03-20T03:50:00+06:00",
+                            "airport": {
+                                "code": "ALA",
+                                "name": "Алматы"
+                            },
+                            "terminal": "1"
+                        },
+                        "arr": {
+                            "at": "2022-03-20T06:00:00+06:00",
+                            "airport": {
+                                "code": "NQZ",
+                                "name": "Нур-Султан (Астана)"
+                            },
+                            "terminal": "9"
+                        },
+                        "baggage": null
+                    }
+                ]
+            },
+            {
+                "duration": 19800,
+                "segments": [
+                    {
+                        "operating_airline": "DV",
+                        "flight_number": "540",
+                        "equipment": "Airbus A318",
+                        "cabin": "Economy",
+                        "dep": {
+                            "at": "2022-03-21T03:20:00+06:00",
+                            "airport": {
+                                "code": "NQZ",
+                                "name": "Нур-Султан (Астана)"
+                            },
+                            "terminal": "3"
+                        },
+                        "arr": {
+                            "at": "2022-03-21T06:25:00+06:00",
+                            "airport": {
+                                "code": "PWQ",
+                                "name": "Павлодар"
+                            },
+                            "terminal": "9"
+                        },
+                        "baggage": null
+                    },
+                    {
+                        "operating_airline": "DV",
+                        "flight_number": "709",
+                        "equipment": "Boeing 777 Freighter",
+                        "cabin": "Economy",
+                        "dep": {
+                            "at": "2022-03-21T09:35:00+06:00",
+                            "airport": {
+                                "code": "PWQ",
+                                "name": "Павлодар"
+                            },
+                            "terminal": "9"
+                        },
+                        "arr": {
+                            "at": "2022-03-21T12:00:00+06:00",
+                            "airport": {
+                                "code": "ALA",
+                                "name": "Алматы"
+                            },
+                            "terminal": "7"
+                        },
+                        "baggage": null
+                    }
+                ]
+            }
+        ],
+        "price": {
+            "amount": 68,
+            "currency": "EUR"
+        },
+        "refundable": false,
+        "baggage": null,
+        "cabin": "Economy",
+        "airline": {
+            "code": "DV",
+            "name": "SCAT",
+            "logo": {
+                "url": "https://avia-api.k8s-test.aviata.team/img/5661-501f546c73c976a96cf0d18e600b4d7a.gif",
+                "width": 1416,
+                "height": 274
+            }
+        },
+        "passengers": {
+            "ADT": 1,
+            "CHD": 0,
+            "INF": 0
+        },
+        "type": "RT"
+    },
+    "passengers": [
+        {
+            "gender": "M",
+            "type": "ADT",
+            "first_name": "CRAIGE",
+            "last_name": "BENSEN",
+            "date_of_birth": "1987-01-24",
+            "citizenship": "US",
+            "document": {
+                "number": "N234346356",
+                "expires_at": "2025-01-24",
+                "iin": "123456789123"
+            }
+        }
+    ]
+}

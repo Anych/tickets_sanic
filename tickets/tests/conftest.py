@@ -1,4 +1,3 @@
-import asyncio
 import os
 import sys
 
@@ -33,16 +32,16 @@ async def app():
 async def database(app):
     from code.settings import TEST_DATABASE_URL
 
-    table = load_file('tests/data/create_booking.sql')
+    migrations = load_file('tests/data/create_booking.sql')
+    app.ctx.db_pool = await asyncpg.create_pool(dsn=TEST_DATABASE_URL)
+    conn = await asyncpg.connect(TEST_DATABASE_URL)
+
     try:
-        app.ctx.testing_db = await asyncpg.create_pool(dsn=TEST_DATABASE_URL)
-        async with app.ctx.testing_db.acquire() as db_conn:
-            await db_conn.execute(f'{table}')
+        await conn.execute(migrations)
 
     finally:
-        async with app.ctx.testing_db.acquire() as db_conn:
-            await db_conn.execute('DROP TABLE IF EXISTS public.booking; DROP SCHEMA test CASCADE;')
-            await app.ctx.testing_db.close()
+        await conn.execute('DROP TABLE IF EXISTS test.booking; DROP SCHEMA test CASCADE')
+        await conn.close()
 
 
 @fixture
@@ -79,3 +78,13 @@ def status_response():
 def search_result_response(fake_uuid, providers_offer):
     providers_offer = ujson.loads(providers_offer)
     return {'search_id': fake_uuid, 'status': 'DONE', 'items': [providers_offer, providers_offer]}
+
+
+@fixture
+def booking_data():
+    return ujson.loads(load_file('tests/data/data_for_booking.json'))
+
+
+@fixture
+def created_booking():
+    return ujson.loads(load_file('tests/data/booking_created.json'))

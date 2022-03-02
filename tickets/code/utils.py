@@ -1,19 +1,18 @@
-import httpx
 import ujson
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from code.currencies_countries import update_rate_exchange
+from code.currencies import update_rate_exchange
 from code.settings import SEARCH_EXPIRE_TIME
+from code import client
 
 
 async def get_currency_rates(redis):
     async with redis as redis_conn:
         currencies = await redis_conn.hgetall('currencies')
-    print(currencies, 123123312231)
+
     currencies_dict = dict()
     for title, value in currencies.items():
         try:
-            title = ujson.loads(title)
             value = ujson.loads(value)
             currencies_dict[title] = value
         except Exception as e:
@@ -47,9 +46,9 @@ async def check_if_searching_is_done(redis_conn, search_id):
 
 async def get_data_from_provider(data):
     try:
-        async with httpx.AsyncClient() as client:
-            data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/search',
-                                     json=data, timeout=30)
+        async with client.HTTPClient() as cl:
+            data = await cl.post(r'https://avia-api.k8s-test.aviata.team/offers/search',
+                                 json=data, timeout=30)
     except Exception as e:
         print(e)
         data = None
@@ -67,6 +66,7 @@ async def search_in_providers(request, provider, search_id):
     async with app.ctx.redis.pipeline(transaction=True) as pipe:
         if data:
             data = data.json()
+
             provider_id = data['search_id']
 
             await change_currency_to_kzt(data['items'], app.ctx.redis)
@@ -75,7 +75,6 @@ async def search_in_providers(request, provider, search_id):
             items = ujson.dumps(data['items'])
             await pipe.set(provider_id, items)
             await pipe.expire(provider_id, SEARCH_EXPIRE_TIME)
-
             for item in data['items']:
                 offer = ujson.dumps(item)
                 await pipe.set(item['id'], offer)
@@ -88,10 +87,9 @@ async def search_in_providers(request, provider, search_id):
 
 
 async def create_booking_in_provider(request):
-    async with httpx.AsyncClient() as client:
-        data = await client.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
-                                 json=request.json, timeout=60)
-
+    async with client.HTTPClient() as cl:
+        data = await cl.post(r'https://avia-api.k8s-test.aviata.team/offers/booking',
+                             json=request.json, timeout=60)
         return data.json()
 
 
