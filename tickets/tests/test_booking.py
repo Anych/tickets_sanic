@@ -13,7 +13,6 @@ from data.get_booking import test_booking
     ('2010-03-02T19:01:15.639813+06:00', 404),
 ])
 async def test_get_booking(app, fake_uuid, value, expected_status):
-
     test_booking[0]['expires_at'] = value
     Connection.fetch = AsyncMock(return_value=test_booking)
 
@@ -24,7 +23,6 @@ async def test_get_booking(app, fake_uuid, value, expected_status):
 
 
 async def test_create_booking_with_create_exception(app, mocker, booking_data):
-
     resp = MagicMock(status_code=200)
 
     mocker.patch.object(PassengerValidator, 'prepare_data', return_value=True)
@@ -37,7 +35,6 @@ async def test_create_booking_with_create_exception(app, mocker, booking_data):
 
 
 async def test_create_booking(app, mocker, booking_data):
-
     resp = MagicMock(status_code=200)
 
     Connection.transaction.start = AsyncMock()
@@ -53,7 +50,6 @@ async def test_create_booking(app, mocker, booking_data):
 
 
 async def test_create_booking_with_cerberus_exception(app, mocker, booking_data):
-
     mocker.patch.object(PassengerValidator, 'prepare_data', return_value=False)
     request, response = await app.asgi_client.post('/booking', json=booking_data)
 
@@ -62,7 +58,6 @@ async def test_create_booking_with_cerberus_exception(app, mocker, booking_data)
 
 
 async def test_create_booking_not_found_exception(app, mocker, booking_data):
-
     text = {"detail": "Not found"}
 
     mocker.patch.object(PassengerValidator, 'prepare_data', return_value=True)
@@ -74,13 +69,27 @@ async def test_create_booking_not_found_exception(app, mocker, booking_data):
     assert response.status == 404
 
 
-@pytest.mark.parametrize('args, expected_status', [
-    ('limit=10&page=0', 200),
-])
-async def test_search_booking(app, args, expected_status):
+async def test_search_booking_with_limit(app):
 
-    request, response = await app.asgi_client.get(f'/booking?{args}')
+    total = [{'count': 0}]
+    all_bookings = list()
+    pagination = {'page': '0', 'items': all_bookings, 'limit': '10', 'total': 0}
+
+    Connection.fetch = AsyncMock(side_effect=[total, all_bookings])
+
+    request, response = await app.asgi_client.get(f'/booking?limit=10&page=0')
 
     assert request.method == 'GET'
-    assert response.status == expected_status
+    assert response.status == 200
+    assert response.json == pagination
 
+
+async def test_search_booking_with_email(app):
+
+    Connection.fetch = AsyncMock(return_value='')
+
+    request, response = await app.asgi_client.get(f'/booking??email=user@example.com&phone=+77777777777')
+
+    assert request.method == 'GET'
+    assert response.status == 200
+    assert response.json == []

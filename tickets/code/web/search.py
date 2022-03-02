@@ -10,6 +10,7 @@ from code.validators import SearchValidator
 
 
 async def create_search(request):
+
     is_validated = await SearchValidator(request.json).prepare_data()
     if not is_validated:
         raise cerberus.SchemaError
@@ -22,6 +23,7 @@ async def create_search(request):
 
 
 async def search_result(request, search_id):
+
     app = request.app
     result = {'search_id': search_id, 'status': 'PENDING', 'items': []}
 

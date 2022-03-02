@@ -1,10 +1,10 @@
 import datetime
+import json
 
 import cerberus
 import ujson
 from sanic import response, exceptions
 
-from bin.countries import countries
 from code.errors import BookingCreateException
 from code.utils import create_booking_in_provider
 from code.validators import PassengerValidator
@@ -29,7 +29,7 @@ async def get_booking(request, booking_id):
 async def create_booking(request):
 
     for passenger in request.json['passengers']:
-        is_validated = await PassengerValidator(passenger, countries).prepare_data()
+        is_validated = await PassengerValidator(passenger).prepare_data()
         if not is_validated:
             raise cerberus.schema.SchemaError
 
@@ -70,15 +70,15 @@ async def search_booking(request):
     if 'limit' in request.args:
         async with request.app.ctx.db_pool.acquire() as db_conn:
             limit, page = request.args.get('limit'), request.args.get('page')
-            total = await db_conn.fetch(f"SELECT COUNT(id) FROM public.booking")
-            total = [{'count': d['count'] for d in total}][0]
+            total = await db_conn.fetch(f"SELECT COUNT(id) FROM booking")
+            total = total[0]['count']
 
             all_bookings = await db_conn.fetch(f"SELECT * FROM booking ORDER BY id "
                                                f"LIMIT {limit} "
                                                f"OFFSET {page} * {limit}")
 
-        pagination = {'page': f"{page}", 'items': all_bookings,
-                      'limit': f"{limit}", 'total': f'{total["count"]}'}
+        pagination = {'page': page, 'items': all_bookings,
+                      'limit': limit, 'total': total}
 
         return response.json(pagination, dumps=ujson.dumps, default=str)
 
@@ -88,6 +88,6 @@ async def search_booking(request):
             all_bookings = await db_conn.fetch(f"SELECT * FROM booking "
                                                f"WHERE email = '{email}' "
                                                f"AND phone = '+{phone}' ORDER BY id")
-        all_bookings = [d for d in all_bookings]
+            all_bookings = [d for d in all_bookings]
 
-        return response.json(all_bookings, dumps=ujson.dumps, default=str)
+        return response.json(all_bookings, dumps=json.dumps, default=str)

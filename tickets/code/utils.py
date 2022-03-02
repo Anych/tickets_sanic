@@ -7,6 +7,7 @@ from code import client
 
 
 async def get_currency_rates(redis):
+
     async with redis as redis_conn:
         currencies = await redis_conn.hgetall('currencies')
 
@@ -22,7 +23,9 @@ async def get_currency_rates(redis):
 
 
 async def change_currency_to_kzt(offers, redis):
+
     currencies = await get_currency_rates(redis)
+
     for offer in offers:
         if offer['price']['currency'] == 'KZT':
             continue
@@ -37,14 +40,17 @@ async def change_currency_to_kzt(offers, redis):
 
 
 async def check_if_searching_is_done(redis_conn, search_id):
+
     if len(await redis_conn.hgetall(search_id)) == 3:
         await redis_conn.hset(search_id, 'status', 'DONE')
+
     else:
         await redis_conn.hset(search_id, 'status', 'PENDING')
     await redis_conn.expire(search_id, SEARCH_EXPIRE_TIME)
 
 
 async def get_data_from_provider(data):
+
     try:
         async with client.HTTPClient() as cl:
             data = await cl.post(r'https://avia-api.k8s-test.aviata.team/offers/search',
@@ -57,6 +63,7 @@ async def get_data_from_provider(data):
 
 
 async def search_in_providers(request, provider, search_id):
+
     app = request.app
     async with app.ctx.redis as redis_conn:
         request.json['provider'] = provider
@@ -75,6 +82,7 @@ async def search_in_providers(request, provider, search_id):
             items = ujson.dumps(data['items'])
             await pipe.set(provider_id, items)
             await pipe.expire(provider_id, SEARCH_EXPIRE_TIME)
+
             for item in data['items']:
                 offer = ujson.dumps(item)
                 await pipe.set(item['id'], offer)

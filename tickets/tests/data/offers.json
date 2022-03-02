@@ -1,0 +1,83 @@
+{
+    "id": "3967a475-cead-47b1-b390-125084c105a2",
+    "flights": [
+        {
+            "duration": 20700,
+            "segments": [
+                {
+                    "operating_airline": "Z9",
+                    "flight_number": "803",
+                    "equipment": "Airbus A300",
+                    "cabin": "Economy",
+                    "dep": {
+                        "at": "2022-03-20T03:50:00+06:00",
+                        "airport": {
+                            "code": "ALA",
+                            "name": "Алматы"
+                        },
+                        "terminal": "4"
+                    },
+                    "arr": {
+                        "at": "2022-03-20T09:35:00+06:00",
+                        "airport": {
+                            "code": "NQZ",
+                            "name": "Нур-Султан (Астана)"
+                        },
+                        "terminal": null
+                    },
+                    "baggage": null
+                }
+            ]
+        },
+        {
+            "duration": 10800,
+            "segments": [
+                {
+                    "operating_airline": "Z9",
+                    "flight_number": "826",
+                    "equipment": "Boeing 737-900",
+                    "cabin": "Economy",
+                    "dep": {
+                        "at": "2022-03-21T03:15:00+06:00",
+                        "airport": {
+                            "code": "NQZ",
+                            "name": "Нур-Султан (Астана)"
+                        },
+                        "terminal": "5"
+                    },
+                    "arr": {
+                        "at": "2022-03-21T06:15:00+06:00",
+                        "airport": {
+                            "code": "ALA",
+                            "name": "Алматы"
+                        },
+                        "terminal": "9"
+                    },
+                    "baggage": null
+                }
+            ]
+        }
+    ],
+    "price": {
+        "amount": 500,
+        "currency": "EUR"
+    },
+    "refundable": false,
+    "baggage": null,
+    "cabin": "Economy",
+    "airline": {
+        "code": "Z9",
+        "name": "Bek Air",
+        "logo": {
+            "url": "https://avia-api.k8s-test.aviata.team/img/5615-ea5b517109ceed9197cad9ed19880b23.svg",
+            "width": null,
+            "height": null
+        }
+    },
+    "passengers": {
+        "ADT": 1,
+        "CHD": 0,
+        "INF": 0
+    },
+    "type": "RT"
+}

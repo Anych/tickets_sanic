@@ -3,6 +3,8 @@ import datetime
 import httpx
 from cerberus import Validator
 
+from bin.countries import countries
+
 
 class TicketsValidator:
 
@@ -13,17 +15,14 @@ class TicketsValidator:
         self.validate_functions = tuple()
 
     async def prepare_data(self):
-        try:
-            for func in self.validate_functions:
-                await func()
-                if self.is_validated:
-                    continue
-                else:
-                    return self.is_validated
-            return self.is_validated
-        except Exception as e:
-            print(e)
-            return False
+        for func in self.validate_functions:
+            await func()
+            if self.is_validated:
+                continue
+            else:
+
+                return self.is_validated
+        return self.is_validated
 
 
 class SearchValidator(TicketsValidator):
@@ -102,13 +101,12 @@ class SearchValidator(TicketsValidator):
 
 class PassengerValidator(TicketsValidator):
 
-    def __init__(self, data, countries):
+    def __init__(self, data):
         super().__init__(data)
         self.validate_functions = (self.validate_gender, self.validate_passenger_type, self.validate_citizenship,
                                    self.validate_first_and_last_name, self.validate_date_of_birth,
                                    self.validate_type_and_date_of_birth, self.validate_document_number,
                                    self.validate_document_expires_at, self.validate_iin)
-        self.countries = countries
         self.document = self.data['document']
 
     async def validate_gender(self):
@@ -121,7 +119,7 @@ class PassengerValidator(TicketsValidator):
 
     async def validate_citizenship(self):
         citizenship = self.data['citizenship']
-        for country in self.countries['items']:
+        for country in countries['items']:
             if country['code'] == citizenship:
                 self.is_validated = True
                 break
@@ -133,6 +131,8 @@ class PassengerValidator(TicketsValidator):
         self.v.schema = {'names': {'required': True, 'type': 'string'}}
         for name in self.data['first_name'], self.data['last_name']:
             self.is_validated = self.v.validate({'names': name})
+            if not self.is_validated:
+                break
 
     async def validate_date_of_birth(self):
         self.v.schema = {'date': {'required': True, 'type': 'string', 'maxlength': 10, 'minlength': 10}}
