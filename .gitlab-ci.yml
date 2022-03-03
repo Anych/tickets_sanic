@@ -16,7 +16,6 @@ stages:
   APP_DOMAIN: $SERVICE_NAME.k8s-test.aviata.team
   BASE_URL: https://$APP_DOMAIN
   REPLICA_COUNT: 1
-  DATABASE_URL: postgres://postgres@postgres/dev6?sslmode=disable
   REDIS_URL: redis://redis:6379/6
 
 build image:
