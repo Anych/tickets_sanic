@@ -2,9 +2,9 @@ import aioredis
 import asyncpg
 from sanic import Sanic, exceptions
 
+from code import settings
+from code import web
 from code.errors import *
-
-from code import settings, web
 
 app = Sanic('tickets')
 

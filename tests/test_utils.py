@@ -4,8 +4,8 @@ import aioredis
 import pytest
 import ujson
 
-from code import settings, client
-from code.utils import get_currency_rates, get_data_from_provider, change_currency_to_kzt
+from anuarbek.code import settings, client
+from anuarbek.code.utils import get_currency_rates, get_data_from_provider, change_currency_to_kzt
 from utils import load_file
 
 
@@ -57,7 +57,7 @@ async def test_get_data_from_provider_with_exception(mocker):
 ])
 async def test_change_currency_to_kzt(mocker, key):
 
-    offer = ujson.loads(load_file('tests/data/offers.json'))
+    offer = ujson.loads(load_file('anuarbek/tests/data/offers.json'))
     offer['price']['currency'] = key
 
     mocker.patch('code.utils.get_currency_rates', return_value={'EUR': {'description': '317.95', 'quant': '1'}})

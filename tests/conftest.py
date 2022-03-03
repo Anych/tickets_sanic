@@ -16,7 +16,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 @fixture
 async def app():
-    from code import app as sanic_app
+    from anuarbek.code import app as sanic_app
 
     test_app = Sanic('test-app')
     test_app.router = sanic_app.app.router
@@ -29,7 +29,7 @@ async def app():
 
 @fixture
 def search_data():
-    return ujson.loads(load_file('tests/data/details_for_search.json'))
+    return ujson.loads(load_file('anuarbek/tests/data/details_for_search.json'))
 
 
 @fixture
@@ -49,7 +49,7 @@ def providers_id():
 
 @fixture
 def providers_offer():
-    return load_file('tests/data/provider_response.json')
+    return load_file('anuarbek/tests/data/provider_response.json')
 
 
 @fixture
@@ -65,9 +65,9 @@ def search_result_response(fake_uuid, providers_offer):
 
 @fixture
 def booking_data():
-    return ujson.loads(load_file('tests/data/data_for_booking.json'))
+    return ujson.loads(load_file('anuarbek/tests/data/data_for_booking.json'))
 
 
 @fixture
 def created_booking():
-    return ujson.loads(load_file('tests/data/booking_created.json'))
+    return ujson.loads(load_file('anuarbek/tests/data/booking_created.json'))

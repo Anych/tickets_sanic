@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from code import validators
+from anuarbek.code import validators
 
 
 async def test_tickets_validator_success(search_data):
