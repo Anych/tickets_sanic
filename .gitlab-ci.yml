@@ -33,7 +33,6 @@ build image:
     - docker push $BUILD_IMAGE
     - docker tag $BUILD_IMAGE $BUILD_IMAGE_LATEST
     - docker push $BUILD_IMAGE_LATEST
-    - docker-compose up
 
 deploy k8s:
   stage: deploy
