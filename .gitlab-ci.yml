@@ -12,7 +12,7 @@ stages:
   BUILD_DOCKERFILE: ./docker/Dockerfile
   BUILD_IMAGE: $CI_REGISTRY_IMAGE:b$CI_PIPELINE_ID
   BUILD_IMAGE_LATEST: $CI_REGISTRY_IMAGE:latest
-  DEBUG: "False"
+  DEBUG: "True"
   APP_DOMAIN: $SERVICE_NAME.k8s-test.aviata.team
   BASE_URL: https://$APP_DOMAIN
   REPLICA_COUNT: 1

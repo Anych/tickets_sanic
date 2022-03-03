@@ -24,7 +24,7 @@ spec:
         command: ["python", "-m", "code.app"]
         ports:
           - name: web-port
-            containerPort: 8000
+            containerPort: 8080
             protocol: TCP
       imagePullSecrets:
       - name: ${SERVICE_NAME}-registry
