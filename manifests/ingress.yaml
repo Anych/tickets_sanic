@@ -20,4 +20,4 @@ spec:
           - path: /
             backend:
               serviceName: ${SERVICE_NAME}
-              servicePort: 8080
+              servicePort: 8000
