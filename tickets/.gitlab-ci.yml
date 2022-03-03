@@ -5,7 +5,7 @@ stages:
   - deploy
 
 .variables: &vars
-  SERVICE_NAME: tickets
+  SERVICE_NAME: dev6-*
   NAMESPACE: dev
   BUILD_DOCKERFILE: ./docker/Dockerfile
   BUILD_IMAGE: $CI_REGISTRY_IMAGE:b$CI_PIPELINE_ID
@@ -14,7 +14,8 @@ stages:
   APP_DOMAIN: $SERVICE_NAME.k8s-test.aviata.team
   BASE_URL: https://$APP_DOMAIN
   REPLICA_COUNT: 1
-  REDIS_URL: redis://redis:6379
+  DATABASE_URL: postgres://postgres@postgres/dev6?sslmode=disable
+  REDIS_URL: redis://redis:6379/6
 
 build image:
   stage: build

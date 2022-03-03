@@ -1,7 +1,6 @@
 import os
 import sys
 
-import asyncpg
 import ujson
 from pytest import fixture
 
@@ -26,22 +25,6 @@ async def app():
     test_app.register_listener(sanic_app.cleanup, 'after_server_stop')
 
     return test_app
-
-
-@fixture
-async def database(app):
-    from code.settings import TEST_DATABASE_URL
-
-    migrations = load_file('tests/data/create_booking.sql')
-    app.ctx.db_pool = await asyncpg.create_pool(dsn=TEST_DATABASE_URL)
-    conn = await asyncpg.connect(TEST_DATABASE_URL)
-
-    try:
-        await conn.execute(migrations)
-
-    finally:
-        await conn.execute('DROP TABLE IF EXISTS test.booking; DROP SCHEMA test CASCADE')
-        await conn.close()
 
 
 @fixture
