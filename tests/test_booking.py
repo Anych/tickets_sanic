@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, AsyncMock
 import pytest
 from asyncpg import Connection
 
-from anuarbek.code import client
-from anuarbek.code.validators import PassengerValidator
+from code import client
+from code.validators import PassengerValidator
 from data.get_booking import test_booking
 
 
