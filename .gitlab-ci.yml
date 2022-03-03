@@ -5,7 +5,7 @@ stages:
   - deploy
 
 .variables: &vars
-  SERVICE_NAME: dev6-*
+  SERVICE_NAME: dev6
   NAMESPACE: dev
   BUILD_DOCKERFILE: ./docker/Dockerfile
   BUILD_IMAGE: $CI_REGISTRY_IMAGE:b$CI_PIPELINE_ID

@@ -1,0 +1,7 @@
+resources:
+  - configmaps.yaml
+  - secrets.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+namespace: ${NAMESPACE}
