@@ -3,6 +3,8 @@ image: docker:latest
 stages:
   - build
   - deploy
+  - test
+  - migration
 
 .variables: &vars
   SERVICE_NAME: dev6
@@ -39,3 +41,13 @@ deploy k8s:
     <<: *vars
   script:
     - kubectl kustomize manifests | envsubst | kubectl apply -f -
+
+pytest:
+  stage: test
+  script:
+    - docker-compose exec app pytest
+
+migration:
+  stage: migration
+  script:
+    - docker-compose exec app dbmate -d migrations/migrate --no-dump-schema migrate

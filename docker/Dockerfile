@@ -4,7 +4,7 @@ RUN pip install --upgrade pip
 
 COPY requirements/ /tmp/requirements
 
-RUN pip install --no-cache-dir -r /tmp/requirements/dev.txt
+RUN pip install --no-cache-dir -r /tmp/requirements/prod.txt
 ENV TZ=Asia/Almaty
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
