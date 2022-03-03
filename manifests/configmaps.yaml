@@ -6,4 +6,5 @@ metadata:
   labels:
     app.kubernetes.io/name: ${SERVICE_NAME}
 data:
+  DATABASE_URL: "${DATABASE_URL}"
   REDIS_URL: "${REDIS_URL}"

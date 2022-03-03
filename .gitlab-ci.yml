@@ -16,6 +16,7 @@ stages:
   APP_DOMAIN: $SERVICE_NAME.k8s-test.aviata.team
   BASE_URL: https://$APP_DOMAIN
   REPLICA_COUNT: 1
+  DATABASE_URL: postgres://postgres:123@postgres/dev6?sslmode=disable
   REDIS_URL: redis://redis:6379/6
 
 build image:
@@ -27,10 +28,12 @@ build image:
     - docker:dind
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker network create app-platform
     - docker build -t $BUILD_IMAGE -f $BUILD_DOCKERFILE .
     - docker push $BUILD_IMAGE
     - docker tag $BUILD_IMAGE $BUILD_IMAGE_LATEST
     - docker push $BUILD_IMAGE_LATEST
+    - docker-compose up
 
 deploy k8s:
   stage: deploy
