@@ -33,6 +33,7 @@ build image:
     - docker push $BUILD_IMAGE
     - docker tag $BUILD_IMAGE $BUILD_IMAGE_LATEST
     - docker push $BUILD_IMAGE_LATEST
+    - apk add python python-dev py-pip build-base
     - pip install docker-compose
     - docker-compose up
 
